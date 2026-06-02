@@ -6,14 +6,16 @@ import {
   Button,
   Stack,
   Alert,
-  CircularProgress,
+  CircularProgress, ButtonGroup,
 } from '@mui/material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import DeleteIcon from '@mui/icons-material/Delete'
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
 import ParsedText from '../ParsedText/ParsedText'
+import {API_CONSTANTS} from "../../Constants/constants.js";
 
 function FileUpload() {
+  const [textType, setTexttype] = useState(API_CONSTANTS.CURSIVE_LETTER)
   const [file, setFile] = useState(null)
   const [loading, setLoading] = useState(false)
   const [response, setResponse] = useState(null)
@@ -76,10 +78,13 @@ function FileUpload() {
     try {
       const formData = new FormData()
       formData.append('file', file)
-
-      const res = await fetch('http://localhost:8080/v1/cursive', {
+      const re = /(?:\.([^.]+))?$/;
+      const res = await fetch(`/v1/${textType}/${re.exec(file.name)[1] === 'pdf' ? 'pdf' : 'file' }`, {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: {
+          'Accept': 'application/json',
+        },
       })
 
       if (!res.ok) {
@@ -113,6 +118,27 @@ function FileUpload() {
       <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
         Upload Document
       </Typography>
+
+      <ButtonGroup variant="contained" aria-label="Basic button group" sx={{ mb: 3 }}>
+        <Button
+          onClick={() => setTexttype(API_CONSTANTS.BLOCK_LETTER)}
+          sx={{
+            backgroundColor: textType === API_CONSTANTS.BLOCK_LETTER ? 'primary.dark' : 'primary.main',
+            boxShadow: textType === API_CONSTANTS.BLOCK_LETTER ? 'inset 0 2px 6px rgba(0,0,0,0.3)' : 'none',
+          }}
+        >
+          Block Letters
+        </Button>
+        <Button
+          onClick={() => setTexttype(API_CONSTANTS.CURSIVE_LETTER)}
+          sx={{
+            backgroundColor: textType === API_CONSTANTS.CURSIVE_LETTER ? 'primary.dark' : 'primary.main',
+            boxShadow: textType === API_CONSTANTS.CURSIVE_LETTER ? 'inset 0 2px 6px rgba(0,0,0,0.3)' : 'none',
+          }}
+        >
+          Cursive Letters
+        </Button>
+      </ButtonGroup>
 
       <Paper
         onDragEnter={handleDrag}
