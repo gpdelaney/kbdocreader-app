@@ -12,7 +12,8 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import DeleteIcon from '@mui/icons-material/Delete'
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
 import ParsedText from '../ParsedText/ParsedText'
-import {API_CONSTANTS} from "../../Constants/constants.js";
+import { uploadFile } from '../../api/ocrApi'
+import { API_CONSTANTS } from '../../Constants/constants.js'
 
 function FileUpload() {
   const [textType, setTexttype] = useState(API_CONSTANTS.CURSIVE_LETTER)
@@ -76,29 +77,12 @@ function FileUpload() {
     setError(null)
 
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      const re = /(?:\.([^.]+))?$/;
-      const res = await fetch(`/v1/${textType}/${re.exec(file.name)[1] === 'pdf' ? 'pdf' : 'file' }`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Accept': 'application/json',
-        },
-      })
-
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`)
-      }
-
-      const data = await res.json()
+      const data = await uploadFile(textType, file)
       setResponse(data)
       setFile(null)
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
-      }
+      if (fileInputRef.current) fileInputRef.current.value = ''
     } catch (err) {
-      setError(`Upload failed: ${err.message}`)
+      setError(err.message)
     } finally {
       setLoading(false)
     }
